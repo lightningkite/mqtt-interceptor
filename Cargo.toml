@@ -1,6 +1,10 @@
+[lib]
+crate-type = ["cdylib"]
+
 [package]
 name = "mqtt-interceptor"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+mosquitto-plugin = "2.1.3"
