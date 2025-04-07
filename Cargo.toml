@@ -8,3 +8,4 @@ edition = "2024"
 
 [dependencies]
 mosquitto-plugin = "2.1.3"
+ron = "0.9.0"
