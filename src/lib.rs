@@ -6,7 +6,6 @@ pub struct MQTTInterceptor {
     disabled_payload: Option<Vec<u8>>,
 }
 
-// Required trait implementation
 impl MosquittoPlugin for MQTTInterceptor {
     fn init(opts: std::collections::HashMap<&str, &str>) -> Self {
         let disabled_payload = opts
@@ -28,7 +27,11 @@ impl MosquittoPlugin for MQTTInterceptor {
 
         match &self.disabled_payload {
             Some(it) => {
-                if it == msg.payload {
+                let payload = msg.payload.to_vec();
+                let reject_payload = payload.len() == it.len()
+                    && payload.iter().enumerate().all(|(index, x)| it[index] == *x);
+
+                if reject_payload {
                     Err(Error::AclDenied)
                 } else {
                     Ok(Success)
@@ -39,5 +42,4 @@ impl MosquittoPlugin for MQTTInterceptor {
     }
 }
 
-// This generates the dynamic c bindings functions that are exported and usable by mosquitto
 create_dynamic_library!(MQTTInterceptor);
