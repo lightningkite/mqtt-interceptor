@@ -18,13 +18,9 @@ impl MosquittoPlugin for MQTTInterceptor {
     fn acl_check(
         &mut self,
         _client: &dyn MosquittoClientContext,
-        level: AclCheckAccessLevel,
+        _: AclCheckAccessLevel,
         msg: MosquittoMessage,
     ) -> Result<Success, mosquitto_plugin::Error> {
-        mosquitto_debug!("disabled topics: {:?}", self.disabled_payload);
-        mosquitto_debug!("topic: {}", msg.topic);
-        mosquitto_debug!("level requested: {}", level);
-
         match &self.disabled_payload {
             Some(it) => {
                 let payload = msg.payload.to_vec();
