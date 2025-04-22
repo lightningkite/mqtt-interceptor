@@ -6,6 +6,7 @@ pub struct MQTTInterceptor {
     username: String,
     password: String,
     disabled_payload: Option<Vec<u8>>,
+    unchecked_topics: Option<Vec<String>>,
 }
 
 impl MosquittoPlugin for MQTTInterceptor {
@@ -17,11 +18,15 @@ impl MosquittoPlugin for MQTTInterceptor {
         let disabled_payload = opts
             .get("disabled_payload")
             .map(|x| from_str::<Vec<u8>>(x).expect("Failed to parse disabled_payload"));
+        let unchecked_topics = opts
+            .get("unchecked_topics")
+            .map(|x| from_str::<Vec<String>>(x).expect("Failed to parse excluded_topics"));
 
         MQTTInterceptor {
             username,
             password,
             disabled_payload,
+            unchecked_topics,
         }
     }
 
@@ -58,7 +63,10 @@ impl MosquittoPlugin for MQTTInterceptor {
                 let reject_payload = payload.len() == it.len()
                     && payload.iter().enumerate().all(|(index, x)| it[index] == *x);
 
-                if reject_payload {
+                let r = &self.unchecked_topics.as_ref();
+                let unchecked = r.map_or(false, |it| it.iter().any(|x| x.as_str() == msg.topic));
+
+                if reject_payload && !unchecked {
                     Err(Error::AclDenied)
                 } else {
                     Ok(Success)
